@@ -5,15 +5,12 @@ import dao.UserDao;
 import model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
-
 import java.util.List;
 
 //ну здесь собственно объясняется спринг, что этот класс явялется сервлетом(контроллером)
@@ -21,13 +18,14 @@ import java.util.List;
 public class MyController {
     //Аннотация @Autowired неявно внедряет объектную зависимость.
     @Autowired
-    private UserDao userDao;
+    private UserDao UserServiceImpl;
 
-    //он создает базовый URI, для которого будет использоваться метод
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    //он создает базовый URI, для которого будет использоваться контроллер
+    @RequestMapping(value = "/")
     public ModelAndView listContact(ModelAndView model) {
-        List<User> listContact = userDao.getAllUsers();
+        List<User> listContact = UserServiceImpl.getAllUsers();
         model.addObject("listContact", listContact);
+        //TODO при ревью перейди на страницы home , там про инкапусляцию
         model.setViewName("home");
         return model;
     }
@@ -37,34 +35,32 @@ public class MyController {
         return new ModelAndView("add");
     }
 
-
     @RequestMapping(value = "/admin/addUser", method = RequestMethod.POST)
-    public ModelAndView addUser(@ModelAttribute User user) {
-        userDao.addUser(user);
-        return new ModelAndView("redirect:/");
+    public String addUser(@ModelAttribute User user) {
+        UserServiceImpl.addUser(user);
+        return "redirect:/";
     }
 
     @RequestMapping(value = "/admin/edit", method = RequestMethod.GET)
     public ModelAndView editUser(HttpServletRequest request) {
         int userId = Integer.parseInt(request.getParameter("id"));
-        User user = userDao.getUserById(userId);
+        User user = UserServiceImpl.getUserById(userId);
         ModelAndView model = new ModelAndView("edit");
         model.addObject("user", user);
         return model;
     }
 
     @RequestMapping(value = "/admin/edit", method = RequestMethod.POST)
-    public ModelAndView editUser(@ModelAttribute User user, HttpServletRequest request) {
-        user.setRole(request.getParameter("role"));
+    public String editUser(@ModelAttribute User user, HttpServletRequest request) {
         user.setId(Integer.parseInt(request.getParameter("id")));
-        userDao.updateUser(user);
-        return new ModelAndView("redirect:/");
+        UserServiceImpl.updateUser(user);
+        return "redirect:/";
     }
 
     @RequestMapping(value = "/admin/delete", method = RequestMethod.GET)
     public String deleteContact(HttpServletRequest request) {
         int userId = Integer.parseInt(request.getParameter("id"));
-        userDao.deleteUser(userId);
+        UserServiceImpl.deleteUser(userId);
         return "redirect:/";
     }
 
